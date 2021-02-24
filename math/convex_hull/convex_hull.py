@@ -58,7 +58,7 @@ def convex_hull(points: Set[Tuple[int, int]], screen: pygame.Surface, animate_al
     pygame.draw.line(screen, THECOLORS['gold'], convex_hull_so_far[len(convex_hull_so_far) - 1], convex_hull_so_far[0], 6)
         
     pygame.display.flip()
-
+    pygame.time.wait(1000)
 
     return convex_hull_so_far
 
@@ -223,20 +223,46 @@ def animate_convex_hull(points: Set[Tuple[int, int]]) -> None:
 if __name__ == '__main__':
     import random
 
+    pygame.init()
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 800
+
+    SCREEN_WIDTH, SCREEN_HEIGHT = pygame.display.Info().current_w, pygame.display.Info().current_h
     NUM_POINTS = 25
+
+    font = pygame.font.Font(None, 25)
+
+
+    #screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    pygame.display.set_caption('Convex Hull Generator')
+    screen.fill(THECOLORS['black'])
+
 
     # A random set of points
     RANDOM_POINTS = {(random.randint(10, SCREEN_WIDTH - 10), random.randint(10, SCREEN_HEIGHT - 10))
                      for _ in range(0, NUM_POINTS)}
 
-    animate_convex_hull(RANDOM_POINTS)
+    #animate_convex_hull(RANDOM_POINTS)
+    hull = convex_hull(RANDOM_POINTS, screen, True)
 
     # Start the event loop
     while True:
         # Process events
+        screen.fill(THECOLORS['black'])
+        RANDOM_POINTS = {(random.randint(10, SCREEN_WIDTH - 10), random.randint(10, SCREEN_HEIGHT - 10))
+                         for _ in range(0, NUM_POINTS)}
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 # Exit the event loop
                 pygame.quit()
+
+        hull = convex_hull(RANDOM_POINTS, screen, True)
+
+        screen.fill(THECOLORS['black'])
+        text = font.render("Percentage of points part of hull: " + str(len(hull)/NUM_POINTS), True, THECOLORS['white'])
+        text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+        screen.blit(text, text_rect)
+        pygame.display.update()
+        pygame.time.wait(1000)
+
