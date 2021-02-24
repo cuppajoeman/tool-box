@@ -5,8 +5,10 @@ import pygame
 import math
 import pygame
 
+clock = pygame.time.Clock()
 
-def convex_hull(screen: pygame.Surface, points: Set[Tuple[int, int]]) -> List[Tuple[int, int]]:
+
+def convex_hull(points: Set[Tuple[int, int]], screen: pygame.Surface, animate_algorithm: bool) -> List[Tuple[int, int]]:
     """Return the convex hull of the given points.
 
     The first point in the convex hull is the one with the smallest x-coordinate,
@@ -23,16 +25,35 @@ def convex_hull(screen: pygame.Surface, points: Set[Tuple[int, int]]) -> List[Tu
     >>> convex_hull(points2)
     [(125, 400), (375, 125), (675, 450), (125, 400)]
     """
+
+    if animate_algorithm:
+        for p in points:
+            pygame.draw.circle(screen, THECOLORS['black'], p, 3)
+
+    pygame.display.flip()
+
+
     starting_point = leftmost(points)
     special_point = (starting_point[0], starting_point[1] + 1)
-    second_point = next_point(screen, special_point, starting_point, points)
+    second_point = next_point(special_point, starting_point, points, screen, animate_algorithm)
+
 
     convex_hull_so_far = [starting_point, second_point]
     while len(convex_hull_so_far) == 1 or starting_point != convex_hull_so_far[-1]:
         prev = convex_hull_so_far[-2]
-        np = next_point(screen, prev, convex_hull_so_far[-1], points)
+        np = next_point(prev, convex_hull_so_far[-1], points, screen, animate_algorithm)
 
         convex_hull_so_far.append(np)
+
+    # After the while loop is done then we have a full convex hull
+    for i in range(0, len(convex_hull_so_far)):
+        pygame.draw.circle(screen, THECOLORS['darkturquoise'], convex_hull_so_far[i], 6)
+
+        if i > 0:
+            pygame.draw.line(screen, THECOLORS['darkturquoise'], convex_hull_so_far[i - 1], convex_hull_so_far[i])
+        
+    pygame.display.flip()
+
 
     return convex_hull_so_far
 
@@ -95,7 +116,7 @@ def angle_between(a: Tuple[int, int], b: Tuple[int, int], c: Tuple[int, int]) ->
     return math.acos(max(-1.0, min(1.0, numerator / denominator)))
 
 
-def next_point(screen: pygame.Surface, prev: Tuple[int, int], curr: Tuple[int, int], points: Set[Tuple[int, int]]) -> Tuple[int, int]:
+def next_point(prev: Tuple[int, int], curr: Tuple[int, int], points: Set[Tuple[int, int]], screen: pygame.Surface, animate_algorithm: bool) -> Tuple[int, int]:
     """Return the next point in the convex hull after curr and prev.
 
     If there is a tie in the angle calculation, pick the point that is *furthest* away from curr.
@@ -121,7 +142,12 @@ def next_point(screen: pygame.Surface, prev: Tuple[int, int], curr: Tuple[int, i
     for q in points:
         if q != curr:
             theta = angle_between(curr, prev, q)
-            pygame.draw.line(screen, THECOLORS['darkturquoise'], curr, q)
+
+            if animate_algorithm:
+                pygame.draw.line(screen, THECOLORS['darkturquoise'], curr, q)
+                pygame.time.wait(1)
+            pygame.display.flip()
+
             if max_angle_point is None:
                 max_angle = theta
                 max_angle_point = q
@@ -139,18 +165,6 @@ def next_point(screen: pygame.Surface, prev: Tuple[int, int], curr: Tuple[int, i
 
 
 
-
-def draw_points(screen: pygame.Surface, points: Set[Tuple[int, int]]) -> None:
-    """Render points as black circles onto the screen.
-
-    Preconditions:
-        - all(0 <= p[0] < screen.width for p in points)  # x-coordinates in range
-        - all(0 <= p[1] < screen.height for p in points)  # y-coordinates in range
-    """
-    for p in points:
-        pygame.draw.circle(screen, THECOLORS['black'], p, 3)
-
-
 def draw_hull(screen: pygame.Surface, points: List[Tuple[int, int]]) -> None:
     """Render points as turquoise circles and adjacent points as turquoise lines onto the screen.
 
@@ -158,11 +172,6 @@ def draw_hull(screen: pygame.Surface, points: List[Tuple[int, int]]) -> None:
         - all(0 <= p[0] < screen.width for p in points)  # x-coordinates in range
         - all(0 <= p[1] < screen.height for p in points)  # y-coordinates in range
     """
-    for i in range(0, len(points)):
-        pygame.draw.circle(screen, THECOLORS['darkturquoise'], points[i], 6)
-
-        if i > 0:
-            pygame.draw.line(screen, THECOLORS['darkturquoise'], points[i - 1], points[i])
 
 
 def animate_convex_hull(points: Set[Tuple[int, int]]) -> None:
@@ -176,30 +185,28 @@ def animate_convex_hull(points: Set[Tuple[int, int]]) -> None:
     pygame.display.set_caption('Use the left and right arrow keys on your keyboard.')
     screen.fill(THECOLORS['white'])
 
-    pygame.display.flip()
+    hull = convex_hull(points, screen, True)
+    #assert len(hull) >= 3
 
-    hull = convex_hull(screen, points)
-    assert len(hull) >= 3
-
-    hull_so_far = [hull[0], hull[1]]
-    current_index = 2
+    #hull_so_far = [hull[0], hull[1]]
+    #current_index = 2
 
     # Start the event loop
-    while True:
-        # Process events
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                # Exit the event loop
-                pygame.quit()
-                return
+    #while True:
+    #    # Process events
+    #    for event in pygame.event.get():
+    #        if event.type == pygame.QUIT:
+    #            # Exit the event loop
+    #            pygame.quit()
+    #            return
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT and current_index < len(hull):
-                    list.append(hull_so_far, hull[current_index])
-                    current_index = current_index + 1
-                elif event.key == pygame.K_LEFT and current_index > 2:
-                    list.pop(hull_so_far)
-                    current_index = current_index - 1
+    #        if event.type == pygame.KEYDOWN:
+    #            if event.key == pygame.K_RIGHT and current_index < len(hull):
+    #                list.append(hull_so_far, hull[current_index])
+    #                current_index = current_index + 1
+    #            elif event.key == pygame.K_LEFT and current_index > 2:
+    #                list.pop(hull_so_far)
+    #                current_index = current_index - 1
 
        # Visualize the hull
        # screen.fill(THECOLORS['white'])
