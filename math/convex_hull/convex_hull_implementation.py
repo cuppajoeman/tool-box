@@ -1,0 +1,222 @@
+from typing import List, Set, Tuple
+from pygame.colordict import THECOLORS
+
+import pygame
+import math
+import pygame
+
+
+def convex_hull(screen: pygame.Surface, points: Set[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    """Return the convex hull of the given points.
+
+    The first point in the convex hull is the one with the smallest x-coordinate,
+    breaking ties by picking the point with the smallest y-coordinate.
+    The points in the convex hull appear in clockwise order.
+
+    Preconditions:
+        - len(points) >= 3
+
+    >>> pts = {(200, 100), (250, 200), (500, 300), (425, 100), (150, 350), (700, 30), (500, 500)}
+    >>> convex_hull(pts)
+    [(150, 350), (200, 100), (700, 30), (500, 500), (150, 350)]
+    >>> points2 = {(125, 400), (375, 125), (675, 450)}
+    >>> convex_hull(points2)
+    [(125, 400), (375, 125), (675, 450), (125, 400)]
+    """
+    starting_point = leftmost(points)
+    special_point = (starting_point[0], starting_point[1] + 1)
+    second_point = next_point(screen, special_point, starting_point, points)
+
+    convex_hull_so_far = [starting_point, second_point]
+    while len(convex_hull_so_far) == 1 or starting_point != convex_hull_so_far[-1]:
+        prev = convex_hull_so_far[-2]
+        np = next_point(screen, prev, convex_hull_so_far[-1], points)
+
+        convex_hull_so_far.append(np)
+
+    return convex_hull_so_far
+
+
+def leftmost(points: Set[Tuple[int, int]]) -> Tuple[int, int]:
+    """Return the leftmost (smallest x-coordinate) point in points.
+
+    If there is a tie, return the one with the smallest y-coordinate.
+
+    Note: because we're using pygame's coordinate system here, small y-coordinates
+    translate to *higher* points in the visualization window.
+
+    Preconditions:
+        - points != set()
+
+    >>> pts = {(200, 100), (250, 200), (500, 300), (425, 100), (150, 350), (700, 30), (500, 500)}
+    >>> leftmost(pts)
+    (150, 350)
+    """
+    # Version 1, using a loop
+    leftmost_so_far = (math.inf, math.inf)
+
+    for p in points:
+        if p[0] < leftmost_so_far[0]:
+            leftmost_so_far = p
+        elif p[0] == leftmost_so_far[0] and p[1] < leftmost_so_far[1]:
+            leftmost_so_far = p
+
+    return leftmost_so_far
+
+    # Version 2, using the min function (since tuples are compared lexicographically)
+    # return min(points)
+
+
+def angle_between(a: Tuple[int, int], b: Tuple[int, int], c: Tuple[int, int]) -> float:
+    """Return the angle between line segments ab and ac, in radians. The formula is derived from
+    the geometric definition of the dot product.
+
+    For any vectors, a, b, and theta being the angle between them
+    
+    a * b =D= ||a||  ||b|| cos(theta)
+
+    Preconditions:
+        - b != a
+        - c != a
+
+    Hint: The `math` module has a function that you need!
+
+    >>> result = angle_between((150, 350), (150, 351), (200, 100))
+    >>> math.isclose(result, 2.9441970937399122)
+    True
+
+    Note: to avoid rounding error, you should use min and max to make sure
+    your "cos" values are between -1 and 1.
+    """
+    numerator = (b[0] - a[0]) * (c[0] - a[0]) + (b[1] - a[1]) * (c[1] - a[1])
+    denominator = math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2) \
+        * math.sqrt((c[0] - a[0]) ** 2 + (c[1] - a[1]) ** 2)
+
+    return math.acos(max(-1.0, min(1.0, numerator / denominator)))
+
+
+def next_point(screen: pygame.Surface, prev: Tuple[int, int], curr: Tuple[int, int], points: Set[Tuple[int, int]]) -> Tuple[int, int]:
+    """Return the next point in the convex hull after curr and prev.
+
+    If there is a tie in the angle calculation, pick the point that is *furthest* away from curr.
+
+    Preconditions:
+      - len(points) >= 3
+      - curr in points
+      - curr and prev are both in the convex hull of points
+
+    Implementation notes:
+        - Call angle_between, but make sure you are passing in the arguments in the correct order
+        - curr is in points; you need to skip over this point to ensure you don't violate a
+          precondition for angle_between
+
+    >>> pts = {(200, 100), (250, 200), (500, 300), (425, 100), (150, 350), (700, 30), (500, 500)}
+    >>> next_point((150, 351), (150, 350), pts)
+    (200, 100)
+    """
+    # Version 1, using a loop
+    max_angle = 0
+    max_angle_point = None
+
+    for q in points:
+        if q != curr:
+            theta = angle_between(curr, prev, q)
+            pygame.draw.line(screen, THECOLORS['darkturquoise'], curr, q)
+            if max_angle_point is None:
+                max_angle = theta
+                max_angle_point = q
+            elif theta > max_angle:
+                max_angle = theta
+                max_angle_point = q
+            elif theta == max_angle and math.dist(curr, max_angle_point) < math.dist(curr, q):
+                max_angle = theta
+                max_angle_point = q
+
+    return max_angle_point
+
+    # Version 2, using min (and a "key" function)
+    # return min(points, key=lambda q: (angle_between(curr, prev, q), - math.dist(curr, q)))
+
+
+
+
+def draw_points(screen: pygame.Surface, points: Set[Tuple[int, int]]) -> None:
+    """Render points as black circles onto the screen.
+
+    Preconditions:
+        - all(0 <= p[0] < screen.width for p in points)  # x-coordinates in range
+        - all(0 <= p[1] < screen.height for p in points)  # y-coordinates in range
+    """
+    for p in points:
+        pygame.draw.circle(screen, THECOLORS['black'], p, 3)
+
+
+def draw_hull(screen: pygame.Surface, points: List[Tuple[int, int]]) -> None:
+    """Render points as turquoise circles and adjacent points as turquoise lines onto the screen.
+
+    Preconditions:
+        - all(0 <= p[0] < screen.width for p in points)  # x-coordinates in range
+        - all(0 <= p[1] < screen.height for p in points)  # y-coordinates in range
+    """
+    for i in range(0, len(points)):
+        pygame.draw.circle(screen, THECOLORS['darkturquoise'], points[i], 6)
+
+        if i > 0:
+            pygame.draw.line(screen, THECOLORS['darkturquoise'], points[i - 1], points[i])
+
+
+def animate_convex_hull(points: Set[Tuple[int, int]]) -> None:
+    """Animate the convex hull algorithm using pygame."""
+
+    pygame.init()
+    screen_size = (800, 800)
+
+
+    screen = pygame.display.set_mode(screen_size)
+    pygame.display.set_caption('Use the left and right arrow keys on your keyboard.')
+    screen.fill(THECOLORS['white'])
+
+    pygame.display.flip()
+
+    hull = convex_hull(screen, points)
+    assert len(hull) >= 3
+
+    hull_so_far = [hull[0], hull[1]]
+    current_index = 2
+
+    # Start the event loop
+    while True:
+        # Process events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                # Exit the event loop
+                pygame.quit()
+                return
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT and current_index < len(hull):
+                    list.append(hull_so_far, hull[current_index])
+                    current_index = current_index + 1
+                elif event.key == pygame.K_LEFT and current_index > 2:
+                    list.pop(hull_so_far)
+                    current_index = current_index - 1
+
+       # Visualize the hull
+       # screen.fill(THECOLORS['white'])
+       # draw_points(screen, points)
+       # draw_hull(screen, hull_so_far)
+
+
+if __name__ == '__main__':
+    import random
+
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 800
+    NUM_POINTS = 100
+
+    # A random set of points
+    RANDOM_POINTS = {(random.randint(10, SCREEN_WIDTH - 10), random.randint(10, SCREEN_HEIGHT - 10))
+                     for _ in range(0, NUM_POINTS)}
+
+    animate_convex_hull(RANDOM_POINTS)
+
