@@ -47,10 +47,15 @@ def convex_hull(points: Set[Tuple[int, int]], screen: pygame.Surface, animate_al
 
     # After the while loop is done then we have a full convex hull
     for i in range(0, len(convex_hull_so_far)):
-        pygame.draw.circle(screen, THECOLORS['darkturquoise'], convex_hull_so_far[i], 6)
+        pygame.draw.circle(screen, THECOLORS['gold'], convex_hull_so_far[i], 6)
 
-        if i > 0:
-            pygame.draw.line(screen, THECOLORS['darkturquoise'], convex_hull_so_far[i - 1], convex_hull_so_far[i])
+        if i + 1 < len(convex_hull_so_far):
+            pygame.draw.line(screen, THECOLORS['gold'], convex_hull_so_far[i], convex_hull_so_far[i+1], 6)
+
+        #if i > 0:
+        #    pygame.draw.line(screen, THECOLORS['darkturquoise'], convex_hull_so_far[i - 1], convex_hull_so_far[i])
+
+    pygame.draw.line(screen, THECOLORS['gold'], convex_hull_so_far[len(convex_hull_so_far) - 1], convex_hull_so_far[0], 6)
         
     pygame.display.flip()
 
@@ -144,8 +149,8 @@ def next_point(prev: Tuple[int, int], curr: Tuple[int, int], points: Set[Tuple[i
             theta = angle_between(curr, prev, q)
 
             if animate_algorithm:
-                pygame.draw.line(screen, THECOLORS['darkturquoise'], curr, q)
-                pygame.time.wait(1)
+                pygame.draw.line(screen, THECOLORS['blue'], curr, q)
+                pygame.time.wait(10)
             pygame.display.flip()
 
             if max_angle_point is None:
@@ -157,6 +162,8 @@ def next_point(prev: Tuple[int, int], curr: Tuple[int, int], points: Set[Tuple[i
             elif theta == max_angle and math.dist(curr, max_angle_point) < math.dist(curr, q):
                 max_angle = theta
                 max_angle_point = q
+
+    pygame.draw.line(screen, THECOLORS['red'], curr, max_angle_point, 3)
 
     return max_angle_point
 
@@ -192,13 +199,12 @@ def animate_convex_hull(points: Set[Tuple[int, int]]) -> None:
     #current_index = 2
 
     # Start the event loop
-    #while True:
-    #    # Process events
-    #    for event in pygame.event.get():
-    #        if event.type == pygame.QUIT:
-    #            # Exit the event loop
-    #            pygame.quit()
-    #            return
+    while True:
+        # Process events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                # Exit the event loop
+                pygame.quit()
 
     #        if event.type == pygame.KEYDOWN:
     #            if event.key == pygame.K_RIGHT and current_index < len(hull):
@@ -227,3 +233,10 @@ if __name__ == '__main__':
 
     animate_convex_hull(RANDOM_POINTS)
 
+    # Start the event loop
+    while True:
+        # Process events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                # Exit the event loop
+                pygame.quit()
