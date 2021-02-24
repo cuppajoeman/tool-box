@@ -28,7 +28,7 @@ def convex_hull(points: Set[Tuple[int, int]], screen: pygame.Surface, animate_al
 
     if animate_algorithm:
         for p in points:
-            pygame.draw.circle(screen, THECOLORS['black'], p, 3)
+            pygame.draw.circle(screen, THECOLORS['white'], p, 3)
 
     pygame.display.flip()
 
@@ -189,8 +189,8 @@ def animate_convex_hull(points: Set[Tuple[int, int]]) -> None:
 
 
     screen = pygame.display.set_mode(screen_size)
-    pygame.display.set_caption('Use the left and right arrow keys on your keyboard.')
-    screen.fill(THECOLORS['white'])
+    pygame.display.set_caption('Convex Hull Generator')
+    screen.fill(THECOLORS['black'])
 
     hull = convex_hull(points, screen, True)
     #assert len(hull) >= 3
@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 800
-    NUM_POINTS = 100
+    NUM_POINTS = 25
 
     # A random set of points
     RANDOM_POINTS = {(random.randint(10, SCREEN_WIDTH - 10), random.randint(10, SCREEN_HEIGHT - 10))
