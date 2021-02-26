@@ -10,7 +10,7 @@ class Player(pygame.sprite.Sprite):
         Left Up Right Down (clockwise order)
         """
         pygame.sprite.Sprite.__init__(self)
-        self.pos = pygame.Vector2(start_pos)
+        self.pos = pygame.math.Vector2(start_pos)
         self.width = width
         self.height = height
         # Create an image of the block, and fill it with a color.
@@ -21,10 +21,10 @@ class Player(pygame.sprite.Sprite):
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
         self.rect = self.image.get_rect()
-        self.movement_vector = pygame.Vector2(0,0)
+        self.movement_vector = pygame.math.Vector2(0,0)
         self.movement_keys = movement_keys
 
-        self.velocity = pygame.Vector2(0,0)
+        self.velocity = pygame.math.Vector2(0,0)
 
         self.max_speed = 4000
         self.acceleration = 2000
@@ -42,7 +42,7 @@ class Player(pygame.sprite.Sprite):
         velocity_change = self.acceleration * delta_time
 
         if not (self.movement_vector.x == 0 and self.movement_vector.y == 0):
-            pygame.Vector2.normalize_ip(self.movement_vector)
+            pygame.math.Vector2.normalize_ip(self.movement_vector)
             self.apply_movement(velocity_change * self.movement_vector)
         else:
             # If no buttons are being pressed then we can apply friction to slow them down
