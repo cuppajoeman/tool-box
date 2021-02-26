@@ -4,8 +4,8 @@ import random
 from player import *
 
 
-WIDTH = 360
-HEIGHT = 480
+WIDTH = 800
+HEIGHT = 800
 FPS = 30
 
 # Define Colors 
@@ -17,7 +17,7 @@ BLUE = (0, 0, 255)
 
 ## initialize pygame and create window
 pygame.init()
-pygame.mixer.init()  ## For sound
+#pygame.mixer.init()  ## For sound
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Atac")
 clock = pygame.time.Clock()     ## For syncing the FPS

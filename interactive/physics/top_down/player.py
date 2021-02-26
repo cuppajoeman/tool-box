@@ -26,9 +26,9 @@ class Player(pygame.sprite.Sprite):
 
         self.velocity = pygame.Vector2(0,0)
 
-        self.max_speed = 100
-        self.acceleration = 75
-        self.friction = 0.01
+        self.max_speed = 4000
+        self.acceleration = 2000
+        self.friction = 0.05
 
 
     def update(self, events, delta_time):
@@ -60,7 +60,7 @@ class Player(pygame.sprite.Sprite):
         if self.velocity.magnitude() - self.friction > 0:
             self.velocity -= self.velocity * self.friction
         else:
-            # If we can't subtract any more
+            # If we can't subtract any more, just set it to zero
             self.velocity.x = 0
             self.velocity.y = 0
 
