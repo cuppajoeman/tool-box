@@ -54,7 +54,7 @@ while running:
     delta_time = (t - ticks_from_previous_iteration ) / 1000.0
     ticks_from_previous_iteration = t
 
-    all_sprites.update(events, delta_time)
+    all_sprites.update(delta_time)
 
 
     #3 Draw/render

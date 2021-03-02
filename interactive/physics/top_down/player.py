@@ -31,7 +31,7 @@ class Player(pygame.sprite.Sprite):
         self.friction = 0.05
 
 
-    def update(self, events, delta_time):
+    def update(self, delta_time):
         keys = pygame.key.get_pressed()
 
         l, u, r, d = self.movement_keys
