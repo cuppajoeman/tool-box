@@ -1,2 +1,4 @@
 Modifying filenames: 
   - rename
+Wrapping text in a file:
+  - fold
