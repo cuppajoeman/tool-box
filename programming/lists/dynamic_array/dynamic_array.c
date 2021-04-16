@@ -25,10 +25,8 @@ void free_darray(DynamicArray *a) {
   a->used = a->length = 0;
 }
 
-void at(DynamicArray *a, void *elem, size_t i) {
-  // this lets you memcpy the indexed element back to
-  //(a->storage + a->elem_size * i) represents a value of the array
-  // a value of the array is a pointer, to get the data into elem
-  // we have to dereference it.
-  memcpy(elem, *(a->storage + a->elem_size * i), a->elem_size);
+void at(DynamicArray *a, void *elem_ptr, size_t i) {
+  // stores the pointer to the element you are looking for in elem_ptr
+  // a->storage + i is pointer arithmetic which allows us to access the ith element
+  memcpy(elem_ptr, a->storage + i, a->elem_size);
 }

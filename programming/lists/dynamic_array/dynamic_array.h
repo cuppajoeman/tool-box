@@ -15,4 +15,4 @@ typedef struct {
 void init_darray(DynamicArray *a, size_t initial_length, size_t elem_size);
 void insert_darray(DynamicArray *a, void *element);
 void free_darray(DynamicArray *a);
-void at(DynamicArray *a, void *elem, size_t i);
+void at(DynamicArray *a, void *elem_ptr, size_t i);
